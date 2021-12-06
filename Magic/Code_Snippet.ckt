@@ -1,0 +1,71 @@
+
+.option scale=0.09u
+.include TSMC_180nm.txt
+.param SUPPLY = 1.8
+.param h = 1.8
+.param l = 0
+.param LAMBDA = 0.18u
+.option scale=0.09u
+.param width_N = {10*LAMBDA}
+.param width_P = {25*LAMBDA}
+.param ckpd = 10ns
+.global gnd vdd 
+
+
+VDS vdd gnd 'SUPPLY'
+
+* va0 a0 gnd dc 'h'
+* va1 a1 gnd dc 'h'
+* va2 a2 gnd dc 'l'
+* va3 a3 gnd dc 'h'
+
+* vb0 b0 gnd dc 'h'
+* vb1 b1 gnd dc 'h'
+* vb2 b2 gnd dc 'h'
+* vb3 b3 gnd dc 'h'
+
+va0 a0 gnd pulse(0 1.8 0 0.01p 0.01p 'ckpd' '2*ckpd')
+va1 a1 gnd pulse(0 1.8 0 0.01p 0.01p '2*ckpd' '4*ckpd')
+va2 a2 gnd pulse(0 1.8 0 0.01p 0.01p '4*ckpd' '8*ckpd')
+va3 a3 gnd pulse(0 1.8 0 0.01p 0.01p '8*ckpd' '16*ckpd')
+
+
+vb0 b0 gnd pulse(0 1.8 0 0.01p 0.01p '16*ckpd' '32*ckpd')
+vb1 b1 gnd pulse(0 1.8 0 0.01p 0.01p '32*ckpd' '64*ckpd')
+vb2 b2 gnd pulse(0 1.8 0 0.01p 0.01p '64*ckpd' '128*ckpd')
+vb3 b3 gnd pulse(0 1.8 0 0.01p 0.01p '128*ckpd' '256*ckpd')
+
+
+vcin cr_in gnd dc 0
+
+
+
+.tran 1ns 1000ns
+
+.measure tran trise 
++ TRIG v(x) VAL = 'SUPPLY/2' RISE = 2
++ TARG v(c) VAL = 'SUPPLY/2' RISE = 1
+
+.measure tran tfall 
++ TRIG v(x) VAL = 'SUPPLY/2' FALL = 3
++ TARG v(c) VAL = 'SUPPLY/2' FALL = 2
+
+.measure tran tpd param = '(trise + tfall)/2' goal = 0
+
+.control 
+run
+set curplottitle= Rishabh_Agrawal_2020102038_input_A
+plot v(a0) v(a1)+2 v(a2)+4 v(a3)+6
+set curplottitle= Rishabh_Agrawal_2020102038_input_B
+plot v(b0) v(b1)+2 v(b2)+4 v(b3)+6
+set curplottitle= Rishabh_Agrawal_2020102038_A.B
+plot v(p0) v(p1)+2 v(p2)+4 v(p3)+6
+set curplottitle= Rishabh_Agrawal_2020102038_AxorB
+plot v(g0) v(g1)+2 v(g2)+4 v(g3)+6
+set curplottitle= Rishabh_Agrawal_2020102038_Sums
+plot v(s0) v(s1)+2 v(s2)+4 v(s3)+6 v(c4)+8
+set curplottitle= Rishabh_Agrawal_2020102038_Carry
+plot v(cr_in) v(c1)+2 v(c2)+4 v(c3)+6 v(c4)+8
+
+.endc
+.end
